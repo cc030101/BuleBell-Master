@@ -1,6 +1,11 @@
 package main
 
 import (
+	"Blue-bell_master/blue-bell_back/dao/mysql"
+	"Blue-bell_master/blue-bell_back/dao/redis"
+	"Blue-bell_master/blue-bell_back/logger"
+	"Blue-bell_master/blue-bell_back/router"
+	"Blue-bell_master/blue-bell_back/settings"
 	"context"
 	"fmt"
 	"log"
@@ -11,59 +16,69 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
-// Go Web开发通用的脚手架
+// Go Web开发较通用的脚手架模板
+
 func main() {
-	//1.	加载配置
+	// 1.加载配置
 	if err := settings.Init(); err != nil {
-		fmt.Printf("Init settings failed, err :%v\n", err)
+		fmt.Printf("init settings failed,err:%v\n", err)
+		return
 	}
-	//2.	初始化日志
+	// 2.初始化日志
 	if err := logger.Init(); err != nil {
-		fmt.Printf("Init logger failed, err :%v\n", err)
+		fmt.Printf("init logger failed,err:%v\n", err)
+		return
 	}
+	//将缓冲区的日志写入磁盘（防止程序结束前日志丢失）。
+	//必须调用 .Sync()，否则最后几条日志可能不会落盘。
 	defer zap.L().Sync()
-	//3.	初始化Mysql连接
+	// 3.初始化MySQL连接
 	if err := mysql.Init(); err != nil {
-		fmt.Printf("Init mysql failed, err :%v\n", err)
+		fmt.Printf("init mysql failed,err:%v\n", err)
+		return
 	}
 	defer mysql.Close()
-	//4.	初始化redis连接
+	// 4.初始化Redis连接
 	if err := redis.Init(); err != nil {
-		fmt.Printf("Init redis failed, err :%v\n", err)
+		fmt.Printf("init redis failed,err:%v\n", err)
+		return
 	}
 	defer redis.Close()
+	// 5.注册路由
+	r := router.Setup() //创建 Gin 引擎（gin.New() 或 gin.Default()）
+	//注册中间件（如日志、recover、JWT 认证等）
+	//挂载各个业务路由（如用户、帖子、评论等 API）
 
-	//5.	路由注册
-	r := router.Setup()
-
-	//6.	启动服务(优雅关机)
+	// 6.启动服务(优雅关机)
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", viper.GetInt("app.port")),
+		//Addr:    fmt.Sprintf(":#{settings.Conf.Port}"),  // 错误 TODO:
+		Addr:    fmt.Sprintf(":%d", viper.GetInt("app.port")), //Go 中要用 fmt.Sprintf 或直接拼接
 		Handler: r,
 	}
 
 	go func() {
-		//开启一个goroutine启动服务
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("listen %s\n", err)
+		// 开启一个goroutine启动服务
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed { //是主动调用 Shutdown() 导致的关闭，属于正常行为，不打印错误。
+			log.Fatalf("listen: %s\n", err)
 		}
 	}()
 
-	//等待中断信号来优雅地关闭服务器，为关闭 服务器操作设置一个5s的超时
-	quit := make(chan os.Signal, 1) //创建一个接收信号的通道
-	//kill 发送syscall.SIGTERM信号
-	//kill -2 发送syscall.SIGINT信号， 比如ctrl + c
-	//kill -9 发送syscall.SIGKILL信号， 但是不能被捕获
-	//signal.Notify把刚收到的 syscall.SIGINT或者syscall.SIGTERM信号发给quit
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) //此处不会阻塞
-	<-quit                                               //阻塞再次，当接受到上述两种信号才会往下执行
+	// 等待中断信号来优雅地关闭服务器，为关闭服务器操作设置一个5秒的超时
+	quit := make(chan os.Signal, 1) // 创建一个接收信号的通道
+	// kill 默认会发送 syscall.SIGTERM 信号
+	// kill -2 发送 syscall.SIGINT 信号，我们常用的Ctrl+C就是触发系统SIGINT信号
+	// kill -9 发送 syscall.SIGKILL 信号，但是不能被捕获，所以不需要添加它
+	// signal.Notify把收到的 syscall.SIGINT或syscall.SIGTERM 信号转发给quit
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) // 此处不会阻塞
+	<-quit                                               // 阻塞在此，当接收到上述两种信号时才会往下执行
 	zap.L().Info("Shutdown Server ...")
-	//创建一个5s超时到context
+	// 创建一个5秒超时的context
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	//5s内优雅关闭服务(将为处理完的请求处理完再关闭服务)，超过5s就退出
+	// 5秒内优雅关闭服务（将未处理完的请求处理完再关闭服务），超过5秒就超时退出
 	if err := srv.Shutdown(ctx); err != nil {
 		zap.L().Fatal("Server Shutdown:", zap.Error(err))
 	}
