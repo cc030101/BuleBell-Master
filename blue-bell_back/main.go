@@ -1,11 +1,11 @@
 package main
 
 import (
-	"Blue-bell_master/blue-bell_back/dao/mysql"
-	"Blue-bell_master/blue-bell_back/dao/redis"
-	"Blue-bell_master/blue-bell_back/logger"
-	"Blue-bell_master/blue-bell_back/router"
-	"Blue-bell_master/blue-bell_back/settings"
+	"blue-bell_back/dao/mysql"
+	"blue-bell_back/dao/redis"
+	"blue-bell_back/logger"
+	"blue-bell_back/router"
+	"blue-bell_back/settings"
 	"context"
 	"fmt"
 	"log"
@@ -28,7 +28,8 @@ func main() {
 		return
 	}
 	// 2.初始化日志
-	if err := logger.Init(); err != nil {
+	//if err := logger.Init(); err != nil {
+	if err := logger.Init(settings.Conf.LogConfig); err != nil {
 		fmt.Printf("init logger failed,err:%v\n", err)
 		return
 	}
@@ -36,13 +37,13 @@ func main() {
 	//必须调用 .Sync()，否则最后几条日志可能不会落盘。
 	defer zap.L().Sync()
 	// 3.初始化MySQL连接
-	if err := mysql.Init(); err != nil {
+	if err := mysql.Init(settings.Conf.MySQLConfig); err != nil {
 		fmt.Printf("init mysql failed,err:%v\n", err)
 		return
 	}
 	defer mysql.Close()
 	// 4.初始化Redis连接
-	if err := redis.Init(); err != nil {
+	if err := redis.Init(settings.Conf.RedisConfig); err != nil {
 		fmt.Printf("init redis failed,err:%v\n", err)
 		return
 	}

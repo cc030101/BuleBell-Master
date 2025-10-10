@@ -2,7 +2,7 @@ package router
 
 import (
 	//倒入自定义的日志哭，用于记录API请求的日志和恢复异常
-	"Blue-bell_master/blue-bell_back/logger"
+	"blue-bell_back/logger"
 	//net/http库，处理HTTP请求
 	"net/http"
 	//gin框架，构建HTTP服务器
