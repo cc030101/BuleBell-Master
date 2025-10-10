@@ -12,9 +12,15 @@ var Conf = new(AppConfig)
 
 // 定义了应用程序配置的结构体，包含了应用程序的基本配置信息
 type AppConfig struct {
-	Name         string                 `mapstructure:"name"` //应用程序名称
-	Mode         string                 `mapstructure:"mode"` //程序运行模式
-	Port         int                    `mapstructure:"port"` //程序运行端口
+	// Name         string                 `mapstructure:"name"` //应用程序名称
+	// Mode         string                 `mapstructure:"mode"` //程序运行模式
+	// Port         int                    `mapstructure:"port"` //程序运行端口
+
+	Name         string                 `mapstructure:"name"`       // 应用程序名称
+	Mode         string                 `mapstructure:"mode"`       // 应用程序运行模式
+	Port         int                    `mapstructure:"port"`       // 应用程序运行端口
+	StartTime    string                 `mapstructure:"start_time"` // 程序开始时间
+	MachineID    int64                  `mapstructure:"machine_id"` //机器ID
 	*LogConfig   `mapstructure:"log"`   //日志配置信息
 	*MySQLConfig `mapstructure:"mysql"` //MySQL数据库配置信息
 	*RedisConfig `mapsturcture:"redis"` //redis数据库配置信息
