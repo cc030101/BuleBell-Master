@@ -1,6 +1,6 @@
 CREATE TABLE `user`(
     `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-    `user_id`   BIGINT(20)  DEFAULT NULL,
+    `user_id`   BIGINT(20)  NOT NULL DEFAULT '0',
     'username'  VARCHAR(64) NOT NULL DEFAULT '',
     "password" VARCHAR(64) NOT  NULL    DEFAULT '',
     "email" VARCHAR(64) DEFAULT NULL,
@@ -8,4 +8,4 @@ CREATE TABLE `user`(
     "create_time"   DATETIME    DEFAULT NULL,
     "update_time"   DATETIME    DEFAULT NULL,
     PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT  CHARSET=utf8;
+)ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;

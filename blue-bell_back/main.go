@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blue-bell_back/controller"
 	"blue-bell_back/dao/mysql"
 	"blue-bell_back/dao/redis"
 	"blue-bell_back/logger"
@@ -55,15 +56,19 @@ func main() {
 		fmt.Printf("init snowflake failed, err:%v\n", err)
 	}
 
-	// 6.注册路由
-	r := router.Setup() //创建 Gin 引擎（gin.New() 或 gin.Default()）
-	//注册中间件（如日志、recover、JWT 认证等）
-	//挂载各个业务路由（如用户、帖子、评论等 API）
+	// 6.初始化gin框架内置的校验器使用的翻译器
+	if err := controller.InitTrans("zh"); err != nil {
+		fmt.Println("init validator trans err:%v", err)
+		return
+	}
 
-	// 7.启动服务(优雅关机)
+	//7.注册路由
+	r := router.Setup(settings.Conf.Mode)
+
+	// 8.启动服务(优雅关机)
 	srv := &http.Server{
 		//Addr:    fmt.Sprintf(":#{settings.Conf.Port}"),  // 错误 TODO:
-		Addr:    fmt.Sprintf(":%d", viper.GetInt("app.port")), //Go 中要用 fmt.Sprintf 或直接拼接
+		Addr:    fmt.Sprintf(":%d", viper.GetInt("port")), //Go 中要用 fmt.Sprintf 或直接拼接
 		Handler: r,
 	}
 
