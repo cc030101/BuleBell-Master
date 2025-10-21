@@ -12,7 +12,7 @@ import (
 func SignUp(p *models.ParamSignUp) (err error) {
 	//处理注册逻辑
 	//1.判断用户是否存在 数据库中检查
-	if err := mysql.CheckUserExist(p.UserName); err != nil {
+	if err := mysql.CheckUserExist(p.Username); err != nil {
 		return err
 	}
 
@@ -21,7 +21,7 @@ func SignUp(p *models.ParamSignUp) (err error) {
 	//构造一个User实例
 	user := &models.User{
 		UserID:   userID,
-		UserName: p.UserName,
+		Username: p.Username,
 		Password: p.RePassword,
 	}
 
@@ -38,7 +38,7 @@ func SignUp(p *models.ParamSignUp) (err error) {
 
 func Login(p *models.ParamLogin) error {
 	user := &models.User{
-		UserName: p.UserName,
+		Username: p.Username,
 		Password: p.Password,
 	}
 
