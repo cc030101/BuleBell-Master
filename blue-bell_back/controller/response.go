@@ -41,6 +41,6 @@ func ResponseSueccess(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, &ResponseData{
 		Code: CodeSuccess,
 		Msg:  CodeSuccess.Msg(),
-		Data: nil,
+		Data: data,
 	})
 }

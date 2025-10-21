@@ -3,6 +3,7 @@ package logic
 import (
 	"blue-bell_back/dao/mysql"
 	"blue-bell_back/models"
+	"blue-bell_back/pkg/jwt"
 	"blue-bell_back/pkg/snowflake"
 )
 
@@ -21,13 +22,10 @@ func SignUp(p *models.ParamSignUp) (err error) {
 	//构造一个User实例
 	user := &models.User{
 		UserID:   userID,
-		Username: p.UserName,
+		UserName: p.UserName,
 		Password: p.RePassword,
 	}
-
-	//3.密码加密
-
-	//4.保存进入数据库
+	//3.密码加密并保存进数据库
 	return mysql.InsertUser(user)
 
 }
@@ -36,11 +34,19 @@ func SignUp(p *models.ParamSignUp) (err error) {
 // 参数 p 包含用户输入的用户名和密码
 // 返回值 error 用于返回登录过程中可能发生的错误
 
-func Login(p *models.ParamLogin) error {
+func Login(p *models.ParamLogin) (token string, err error) {
 	user := &models.User{
-		Username: p.UserName,
+		UserName: p.UserName,
 		Password: p.Password,
 	}
 
-	return mysql.Login(user)
+	//return mysql.Login(user)
+	//传递的是指针，就能拿到user.UserID
+
+	if err := mysql.Login(user); err != nil {
+		return "", err
+	}
+
+	//生成JWT
+	return jwt.GenToken(user.UserID, p.UserName)
 }

@@ -30,7 +30,7 @@ func CheckUserExist(username string) (err error) {
 func InsertUser(user *models.User) (err error) {
 	user.Password = encryptPassword(user.Password)
 	sqlStr := `insert into user(user_id, username, password) values(?,?,?)`
-	_, err = db.Exec(sqlStr, user.UserID, user.Username, user.Password)
+	_, err = db.Exec(sqlStr, user.UserID, user.UserName, user.Password)
 	return
 }
 
@@ -47,9 +47,10 @@ func encryptPassword(oPassword string) string {
 func Login(user *models.User) (err error) {
 	oPassword := user.Password
 	sqlStr := `select user_id, username, password from user where username=?`
-	err = db.Get(user, sqlStr, user.Username)
-	if err == sql.ErrNoRows {
-		return errors.New("用户不存在")
+	err = db.Get(user, sqlStr, user.UserName)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return ErrorUserNotExist
 	}
 
 	if err != nil {
