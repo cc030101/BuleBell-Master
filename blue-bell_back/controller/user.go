@@ -51,7 +51,7 @@ func SignUpHandler(c *gin.Context) {
 		return
 	}
 	//3. 返回响应
-	ResponseSueccess(c, nil)
+	ResponseSuccess(c, nil)
 }
 func LoginHandler(c *gin.Context) {
 	// 1.获取请求参数及参数校验
@@ -82,5 +82,5 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 	// 3.返回响应
-	ResponseSueccess(c, token)
+	ResponseSuccess(c, token)
 }

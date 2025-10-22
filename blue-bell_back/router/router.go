@@ -4,6 +4,7 @@ import ( //倒入自定义的日志哭，用于记录API请求的日志和恢复
 	//gin框架，构建HTTP服务器
 	"blue-bell_back/controller"
 	"blue-bell_back/logger"
+	"blue-bell_back/middlewares"
 	"blue-bell_back/pkg/jwt"
 
 	"net/http"
@@ -25,14 +26,23 @@ func Setup(mode string) *gin.Engine {
 	//使用自定义的日志记录🍺异常恢复中间件
 	r.Use(logger.GinLogger(), logger.GinRecovery(true))
 
-	//注册路由业务
-	r.POST("/signup", controller.SignUpHandler)
-	r.POST("/login", controller.LoginHandler)
+	v1 := r.Group("/api/v1")
 
-	r.GET("/ping", JWTAuthMiddleware(), func(c *gin.Context) {
-		//如果是登陆用户，判断请求头中是否有有效的JWT
-		c.String(http.StatusOK, "pong")
-	})
+	//注册路由业务
+	// r.POST("/signup", controller.SignUpHandler)
+	// r.POST("/login", controller.LoginHandler)
+
+	// r.GET("/ping", JWTAuthMiddleware(), func(c *gin.Context) {
+	// 	//如果是登陆用户，判断请求头中是否有有效的JWT
+	// 	c.String(http.StatusOK, "pong")
+	// })
+	v1.POST("/signup", controller.SignUpHandler)
+	v1.POST("/login", controller.LoginHandler)
+	v1.Use(middlewares.JWTAuthMiddleware())
+	{
+		v1.GET("/community", controller.CommunityHandler)
+		v1.GET("/community/:id", controller.CommunityDetailHandler)
+	}
 
 	//配置GET请求的路由，处理根路径的请求
 	r.GET("/", func(c *gin.Context) {
