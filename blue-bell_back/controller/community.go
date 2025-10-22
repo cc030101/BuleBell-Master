@@ -73,3 +73,24 @@ func CreatePostHandler(c *gin.Context) {
 	//4. 返回
 	ResponseSuccess(c, post)
 }
+
+// PostDetailHandler 帖子详情函数
+func PostDetailHandler(c *gin.Context) {
+	//1.拿到postID
+	id := c.Param("id")
+	postId, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		zap.L().Error("get post detail failed. invalid param", zap.Error(err))
+		ResponseError(c, CodeInvalidParam)
+		return
+	}
+
+	//2.根据帖子id查询帖子详情
+	detail, err := logic.GetPostDetail(uint64(postId))
+	if err != nil {
+		zap.L().Error("service.GetPostDetail failed", zap.Error(err))
+		ResponseError(c, CodeServerBusy)
+		return
+	}
+	ResponseSuccess(c, detail)
+}

@@ -38,13 +38,15 @@ func Setup(mode string) *gin.Engine {
 	// })
 	v1.POST("/signup", controller.SignUpHandler)
 	v1.POST("/login", controller.LoginHandler)
+
+	//JWT认证
 	v1.Use(middlewares.JWTAuthMiddleware())
 	{
-		v1.GET("/community", controller.CommunityHandler)
-		v1.GET("/community/:id", controller.CommunityDetailHandler)
+		v1.GET("/community", controller.CommunityHandler)           //社区列表
+		v1.GET("/community/:id", controller.CommunityDetailHandler) //社区详情
+		v1.POST("/community/post", controller.CreatePostHandler)    //创建帖子
+		v1.GET("/community/post/:id", controller.PostDetailHandler) // 帖子详情
 	}
-
-	v1.POST("/community/post", controller.CreatePostHandler)
 
 	//配置GET请求的路由，处理根路径的请求
 	r.GET("/", func(c *gin.Context) {

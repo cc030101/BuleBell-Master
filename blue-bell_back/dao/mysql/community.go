@@ -42,7 +42,7 @@ func GetCommunityByID(id int64) (communityDetail *models.CommunityDetail, err er
 	return
 }
 
-// CreateCommunity
+// CreateCommunityPost 创建社区的帖子
 // 参数： post：指向包含帖子信息的CommunityPost结构体的指针，包含帖子ID、标题、作者ID、社区ID和内容
 // 返回值：如果插入操作成功，则返回nil；否则返回错误信息
 func CreateCommunityPost(post *models.CommunityPost) (err error) {
@@ -53,6 +53,34 @@ func CreateCommunityPost(post *models.CommunityPost) (err error) {
 
 	if err != nil {
 		return err
+	}
+	return
+}
+
+// GetAuthorNameById 根据用户id查询用户名称
+func GetAuthorNameById(userID uint64) (user *models.User, err error) {
+	user = new(models.User)
+	sqlStr := "select user_id, username from user where user_id = ?"
+	if err := db.Get(user, sqlStr, userID); err != nil {
+		//判断id是否有效
+		if err == sql.ErrNoRows {
+			err = ErrorInvalidID
+			return nil, err
+		}
+	}
+	return
+}
+
+// GetPostDetailByID 根据帖子ID查询帖子详情
+func GetPostDetailByID(postId uint64) (postDetail *models.CommunityPost, err error) {
+	postDetail = new(models.CommunityPost)
+	sqlStr := "select post_id, title, content, author_id, community_id, status, create_time from post where post_id = ?"
+	//执行sql查询，并将结果存储到postDetail中
+	if err := db.Get(postDetail, sqlStr, postId); err != nil {
+		if err == sql.ErrNoRows {
+			err = ErrorInvalidID
+			return nil, err
+		}
 	}
 	return
 }

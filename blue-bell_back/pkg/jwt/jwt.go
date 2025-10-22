@@ -7,7 +7,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-const TokenExpireDuration = time.Hour * 24
+const TokenExpireDuration = time.Hour * 2400
 
 // MySecret 用于加盐的字符串
 var MySecret = []byte("https://gitee.com/Visitor-go/forum")
