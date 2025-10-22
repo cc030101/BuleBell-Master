@@ -42,10 +42,11 @@ func Setup(mode string) *gin.Engine {
 	//JWT认证
 	v1.Use(middlewares.JWTAuthMiddleware())
 	{
-		v1.GET("/community", controller.CommunityHandler)           //社区列表
-		v1.GET("/community/:id", controller.CommunityDetailHandler) //社区详情
-		v1.POST("/community/post", controller.CreatePostHandler)    //创建帖子
-		v1.GET("/community/post/:id", controller.PostDetailHandler) // 帖子详情
+		v1.GET("/community", controller.CommunityHandler)             // 社区列表
+		v1.GET("/community/:id", controller.CommunityDetailHandler)   // 社区详情
+		v1.POST("/community/post", controller.CreatePostHandler)      // 创建帖子
+		v1.GET("/community/post/:id", controller.PostDetailHandler)   // 帖子详情
+		v1.GET("/community/post/list", controller.GetPostListHandler) // 帖子列表
 	}
 
 	//配置GET请求的路由，处理根路径的请求

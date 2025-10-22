@@ -28,7 +28,7 @@ type CommunityPost struct {
 	CreateTime  time.Time `json:"create_time" db:"create_time"`
 }
 
-// ApiPostDetail 帖子详情
+// A帖子详情
 type ApiPostDetail struct {
 	AuthorName       string `json:"author_name"`
 	*CommunityDetail `json:"community_detail"`

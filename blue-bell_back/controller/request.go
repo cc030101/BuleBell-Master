@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,5 +39,27 @@ func getCurrentUserID(c *gin.Context) (userID int64, err error) {
 		return
 	}
 	//转换成功
+	return
+}
+
+// getPageInfo 从请求的上下文中提取并分解分页信息
+func GetPageInfo(c *gin.Context) (page, size int64, err error) {
+	//1.处理分页
+	//获取请求查询参数重的页码字符串
+	pageStr := c.Query("page")
+	//获取请求查询参数重的每页条目字符串
+	sizeStr := c.Query("size")
+	//将页码字符串转换为int64类型，如果转换失败则默认为第1页
+	page, err = strconv.ParseInt(pageStr, 10, 64)
+	if err != nil {
+		page = 1
+	}
+
+	//将每页条目数字符串转换为int64类型，如果转换失败则默认为10条
+	size, err = strconv.ParseInt(sizeStr, 10, 64)
+	if err != nil {
+		size = 10
+	}
+
 	return
 }

@@ -63,3 +63,46 @@ func GetPostDetail(id uint64) (detail *models.ApiPostDetail, err error) {
 	}
 	return
 }
+
+// GetPostList 获取帖子列表逻辑
+func GetPostList(page, size int64) (list []*models.ApiPostDetail, err error) {
+	// 调用mysql.GetPostList获取帖子列表
+	posts, err := mysql.GetPostList(page, size)
+	if err != nil {
+		// 如果获取帖子列表失败，记录错误日志并返回
+		zap.L().Error("mysql.GetPostList failed.", zap.Error(err))
+		return
+	}
+	// 初始化帖子详细信息列表
+	list = make([]*models.ApiPostDetail, 0, len(posts))
+	// 循环posts获取用户名和社区名称
+	for _, post := range posts {
+		// 1.根据作者id查询作者用户名
+		author, err := mysql.GetAuthorNameById(uint64(post.AuthorID))
+		if err != nil {
+			// 如果获取作者用户名失败，记录错误日志并继续处理下一个帖子
+			zap.L().Error("mysql.GetAuthorNameById(post.AuthorID) failed.",
+				zap.Int64("authorID:", post.AuthorID),
+				zap.Error(err))
+			continue
+		}
+		// 2.根据社区id查询社区名称
+		community, err := mysql.GetCommunityByID(post.CommunityID)
+		if err != nil {
+			// 如果获取社区名称失败，记录错误日志并继续处理下一个帖子
+			zap.L().Error("mysql.GetAuthorNameById(post.AuthorID) failed.",
+				zap.Int64("authorID:", post.AuthorID),
+				zap.Error(err))
+			continue
+		}
+		// 3.构建帖子详细信息对象
+		apiPostDetail := &models.ApiPostDetail{
+			AuthorName:      author.UserName,
+			CommunityDetail: community,
+			CommunityPost:   post,
+		}
+		// 4.将帖子详细信息添加到列表中并返回
+		list = append(list, apiPostDetail)
+	}
+	return
+}
