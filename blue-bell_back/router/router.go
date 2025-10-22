@@ -44,6 +44,8 @@ func Setup(mode string) *gin.Engine {
 		v1.GET("/community/:id", controller.CommunityDetailHandler)
 	}
 
+	v1.POST("/community/post", controller.CreatePostHandler)
+
 	//配置GET请求的路由，处理根路径的请求
 	r.GET("/", func(c *gin.Context) {
 		//响应客户端请求,返回HTTP状态码200和字符串"OK"

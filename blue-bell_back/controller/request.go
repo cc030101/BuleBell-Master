@@ -21,7 +21,7 @@ var ErrorUserNotLogin = errors.New("当前用户位登陆")
 // 返回值:userID - 用户 ID，如果成功获取。
 // err - 错误，如果获取失败。
 
-func getCurrentUser(c *gin.Context) (userID uint64, err error) {
+func getCurrentUserID(c *gin.Context) (userID uint64, err error) {
 	//从上下文获取ID
 	uid, ok := c.Get(CtxUserIDKey)
 	if !ok {
@@ -32,9 +32,16 @@ func getCurrentUser(c *gin.Context) (userID uint64, err error) {
 	//将用户ID转换为uint64类型
 	userID, ok = uid.(uint64)
 	if !ok {
-		// 转换失败，返回错误
+		// 检查 uid 是否为 int64 类型，因为有些情况下用户 ID 可能是 int64 类型
+		_, ok := uid.(int64)
+		if ok {
+			//如果是int64 直接返回， 因为无法转换为uint64
+			return
+		}
+		// 转换失败，返回未登录错误
 		err = ErrorUserNotLogin
 		return
 	}
+	//转换成功
 	return
 }

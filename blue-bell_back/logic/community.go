@@ -3,6 +3,7 @@ package logic
 import (
 	"blue-bell_back/dao/mysql"
 	"blue-bell_back/models"
+	"blue-bell_back/pkg/snowflake"
 )
 
 //	社区相关
@@ -15,4 +16,13 @@ func GetCommunityList() ([]*models.Community, error) {
 // GetCommunityDetail 处理获取社区详情逻辑
 func GetCommunityDetail(id int64) (detail *models.CommunityDetail, err error) {
 	return mysql.GetCommunityByID(id)
+}
+
+func CreateCommunityPost(p *models.CommunityPost) (err error) {
+	//1.生成id
+	var id int64
+	id = snowflake.GenID()
+	p.ID = id
+	//2.保存到数据库
+	return mysql.CreateCommunityPost(p)
 }

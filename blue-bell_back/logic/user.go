@@ -5,6 +5,8 @@ import (
 	"blue-bell_back/models"
 	"blue-bell_back/pkg/jwt"
 	"blue-bell_back/pkg/snowflake"
+
+	"go.uber.org/zap"
 )
 
 // SignUp 用户注册函数
@@ -19,6 +21,10 @@ func SignUp(p *models.ParamSignUp) (err error) {
 
 	//2.生成UID
 	userID := snowflake.GenID()
+	if err != nil {
+		zap.L().Error("user snowflake.GenId failed.", zap.Error(err))
+		return
+	}
 	//构造一个User实例
 	user := &models.User{
 		UserID:   userID,

@@ -41,3 +41,18 @@ func GetCommunityByID(id int64) (communityDetail *models.CommunityDetail, err er
 	}
 	return
 }
+
+// CreateCommunity
+// 参数： post：指向包含帖子信息的CommunityPost结构体的指针，包含帖子ID、标题、作者ID、社区ID和内容
+// 返回值：如果插入操作成功，则返回nil；否则返回错误信息
+func CreateCommunityPost(post *models.CommunityPost) (err error) {
+	//定义sql语句来插入帖子信息到数据库
+	sqlStr := "insert into post(post_id, title, author_id, community_id, content) value(?,?,?,?,?)"
+	//执行sql语句，插入帖子信息，并检查是否有错误发生
+	_, err = db.Exec(sqlStr, post.ID, post.Title, post.AuthorID, post.CommunityID, post.Content)
+
+	if err != nil {
+		return err
+	}
+	return
+}
