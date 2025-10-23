@@ -139,8 +139,11 @@ func GetPostOrderList(p *models.ParamOrderList) (data []*models.ApiPostDetail, e
 	posts, err := mysql.GetPostOrderList(ids)
 	zap.L().Info("mysql posts", zap.Any("posts", posts))
 
+	//查询帖子的赞成票数
+	votes, err := redis.GetPostVoteData(ids)
+
 	//循环posts获取用户名和社区名称
-	for _, post := range posts {
+	for index, post := range posts {
 		//1.根据作者id查询作者用户名
 		author, err := mysql.GetAuthorNameById(uint64(post.AuthorID))
 
@@ -162,6 +165,7 @@ func GetPostOrderList(p *models.ParamOrderList) (data []*models.ApiPostDetail, e
 
 		apiPostDetail := &models.ApiPostDetail{
 			AuthorName:      author.UserName,
+			VoteNum:         votes[index],
 			CommunityDetail: community,
 			CommunityPost:   post,
 		}

@@ -39,7 +39,10 @@ const (
 	oneTicketScore float64 = 600           //每票的分数
 )
 
-var ErrVoteExpire = errors.New("距离帖子发出时间已超过7天,不可点赞")
+var (
+	ErrVoteExpire   = errors.New("距离帖子发出时间已超过7天,不可点赞")
+	ErrVoteRepested = errors.New("不允许重复投票")
+)
 
 // 创建帖子存储时间
 func CreateCommunityPost(postID int64) (err error) {
@@ -75,6 +78,11 @@ func VoteForCommunity(userID, postID string, value float64) (err error) {
 	oldValue := rdb.ZScore(getRedisKey(KeyPostVoteZSetPreFix+postID), userID).Val()
 
 	var op float64
+
+	//检验是否重复投票
+	if value == oldValue {
+		return ErrVoteRepested
+	}
 	if value > oldValue {
 		//当前的分数大于历史分数
 		op = 1
