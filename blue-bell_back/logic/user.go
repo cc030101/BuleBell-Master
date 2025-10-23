@@ -38,21 +38,28 @@ func SignUp(p *models.ParamSignUp) (err error) {
 
 // Login 用户登录函数
 // 参数 p 包含用户输入的用户名和密码
-// 返回值 error 用于返回登录过程中可能发生的错误
-
-func Login(p *models.ParamLogin) (token string, err error) {
-	user := &models.User{
+// 返回值 user 是登录成功的用户信息，包括用户ID、用户名和令牌(Token)
+func Login(p *models.ParamLogin) (user *models.User, err error) {
+	//初始化用户信息
+	user = &models.User{
 		UserName: p.UserName,
 		Password: p.Password,
 	}
 
 	//return mysql.Login(user)
-	//传递的是指针，就能拿到user.UserID
+	// 调用mysql.Login函数执行登录操作，如果登录失败，返回错误信息
 
 	if err := mysql.Login(user); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	//生成JWT
-	return jwt.GenToken(user.UserID, p.UserName)
+	//生成用户登录令牌，生成失败，返回错误信息
+	user.Token, err = jwt.GenToken(user.UserID, user.UserName)
+	if err != nil {
+		return
+	}
+
+	// //生成JWT
+	// return jwt.GenToken(user.UserID, p.UserName)
+	return
 }
