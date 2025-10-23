@@ -13,13 +13,6 @@ import (
 // CommunityHandler 处理获取社区列表的函数
 // 该函数查询所有社区的信息，并返回给客户端
 
-const (
-	page       = 10
-	size       = 1
-	ordertime  = "time"
-	orderScore = "score"
-)
-
 func CommunityHandler(c *gin.Context) {
 	//1.查询到所有社区的信息(community_id, community_name)
 	list, err := logic.GetCommunityList()
@@ -120,4 +113,30 @@ func GetPostListHandler(c *gin.Context) {
 	}
 
 	ResponseSuccess(c, list)
+}
+
+// GetPostOrderListHandler 根据指定排序方式返回数据
+func GetPostOrderListHandler(c *gin.Context) {
+	// 初始化结构体并指定默认参数值
+	p := &models.ParamOrderList{
+		Page:  models.Page,
+		Size:  models.Size,
+		Order: models.OrderTime,
+	}
+	// 1.获取参数
+	if err := c.ShouldBindQuery(p); err != nil {
+		zap.L().Error("参数错误", zap.Error(err))
+		ResponseError(c, CodeInvalidParam)
+		return
+	}
+	// 2.去redis查询id列表
+	list, err := logic.GetPostOrderList(p)
+	if err != nil {
+		zap.L().Error("service.GetPostOrderList failed.", zap.Error(err))
+		ResponseError(c, CodeServerBusy)
+		return
+	}
+	// 3.返回响应
+	ResponseSuccess(c, list)
+	return
 }

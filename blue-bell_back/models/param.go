@@ -1,6 +1,13 @@
 package models
 
-// 请求参数结构体
+const (
+	Page       = 10
+	Size       = 1
+	OrderTime  = "time"
+	OrderScore = "score"
+)
+
+// 注册请求参数结构体
 type ParamSignUp struct {
 	UserName   string `json:"username" binding:"required"`
 	Password   string `json:"password" binding:"required"`
@@ -11,4 +18,11 @@ type ParamSignUp struct {
 type ParamLogin struct {
 	UserName string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
+}
+
+// ParamOrderList 获取帖子列表
+type ParamOrderList struct {
+	Page  int64  `json:"page" form:"page"`
+	Size  int64  `json:"size" form:"size"`
+	Order string `json:"order" form:"order"`
 }

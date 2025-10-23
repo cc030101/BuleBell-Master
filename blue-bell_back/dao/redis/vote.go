@@ -24,8 +24,8 @@ case 2 direction = 0:
 
 case 3 direction = -1:
 
-	3.1 用户没有投过票 投了赞成票	+1*432
-	3.2 用户投过赞成票 改投反对票	-2*432
+	3.1 用户没有投过票 投了赞成票	+1*600
+	3.2 用户投过赞成票 改投反对票	-2*600
 
 投票功能限制
 每个帖子自发布之日起7日内允许投票 超过改时间则不允许再投票
@@ -36,7 +36,7 @@ case 3 direction = -1:
 
 const (
 	oneWeekSeconds         = 7 * 24 * 3600 //帖子投票过期时间
-	oneTicketScore float64 = 5             //每票的分数
+	oneTicketScore float64 = 600           //每票的分数
 )
 
 var ErrVoteExpire = errors.New("距离帖子发出时间已超过7天,不可点赞")
