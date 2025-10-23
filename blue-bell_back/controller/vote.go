@@ -3,9 +3,11 @@ package controller
 import (
 	"blue-bell_back/logic"
 	"blue-bell_back/models"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"go.uber.org/zap"
 )
 
 //CommunityVote 处理社区投票的函数
@@ -33,9 +35,9 @@ func CommunityVote(c *gin.Context) {
 	}
 
 	//具体的投票业务逻辑
-	err = logic.CommunityVote(userID, p)
-	if err != nil {
-		ResponseError(c, CodeInvalidParam)
+	if err := logic.CommunityVote(strconv.FormatUint(uint64(userID), 10), p); err != nil {
+		zap.L().Error(" service.CommunityVote failed.", zap.Error(err))
+		ResponseError(c, CodeServerBusy)
 		return
 	}
 

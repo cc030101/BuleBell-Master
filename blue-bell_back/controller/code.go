@@ -14,6 +14,8 @@ const (
 	CodeInvalidToken
 
 	CodeInsertFailed
+
+	CodePostInvalid
 )
 
 var codeMsgMap = map[ResCode]string{
@@ -28,6 +30,7 @@ var codeMsgMap = map[ResCode]string{
 	CodeInvalidToken: "无效的Token",
 
 	CodeInsertFailed: "写入数据失败",
+	CodePostInvalid:  "当前PostID错误",
 }
 
 func (c ResCode) Msg() string {

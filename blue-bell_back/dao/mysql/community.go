@@ -89,25 +89,24 @@ func GetPostDetailByID(postId uint64) (postDetail *models.CommunityPost, err err
 
 func GetPostList(page, size int64) (list []*models.CommunityPost, err error) {
 	list = make([]*models.CommunityPost, 0, 2)
-	sqlStr := "select post_id, title, content, author_id, community_id, status, create_time from post limit ?,?"
+	sqlStr := "select post_id, title, content, author_id, community_id, status, create_time from post order by create_time desc limit ?,?"
 	err = db.Select(&list, sqlStr, (page-1)*size, size)
 	return
 }
 
 //CheckPostExist 检查帖子是否存在
 
-func CheckPostExist(id uint64) (exist bool, err error) {
+func CheckPostExist(id string) (exist bool, err error) {
 	var count int
 
-	sqlStr := "select count(community_id) from community where community_id=?"
-
+	sqlStr := "select count(community_id) from post where post_id = ?"
 	if err := db.Get(&count, sqlStr, id); err != nil {
-		return false, err
+		return exist, err
 	}
-
+	zap.L().Debug("select count from post", zap.Int("count:", count))
 	if count > 0 {
 		return true, nil
 	}
 
-	return false, nil
+	return exist, nil
 }

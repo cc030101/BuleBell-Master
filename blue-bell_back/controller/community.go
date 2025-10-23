@@ -13,6 +13,13 @@ import (
 // CommunityHandler 处理获取社区列表的函数
 // 该函数查询所有社区的信息，并返回给客户端
 
+const (
+	page       = 10
+	size       = 1
+	ordertime  = "time"
+	orderScore = "score"
+)
+
 func CommunityHandler(c *gin.Context) {
 	//1.查询到所有社区的信息(community_id, community_name)
 	list, err := logic.GetCommunityList()
@@ -71,7 +78,7 @@ func CreatePostHandler(c *gin.Context) {
 		return
 	}
 	//4. 返回
-	ResponseSuccess(c, post)
+	ResponseSuccess(c, nil)
 }
 
 // PostDetailHandler 帖子详情函数
