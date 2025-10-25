@@ -34,7 +34,7 @@ func CreateCommunityPost(p *models.CommunityPost) (err error) {
 	}
 
 	//保存到redis
-	err = redis.CreateCommunityPost(int64(id))
+	err = redis.CreateCommunityPost(int64(id), p.CommunityID)
 	return
 }
 
@@ -161,6 +161,53 @@ func GetPostOrderList(p *models.ParamOrderList) (data []*models.ApiPostDetail, e
 				zap.Int64("authorID:", post.CommunityID),
 				zap.Error(err))
 			continue
+		}
+
+		apiPostDetail := &models.ApiPostDetail{
+			AuthorName:      author.UserName,
+			VoteNum:         votes[index],
+			CommunityDetail: community,
+			CommunityPost:   post,
+		}
+		data = append(data, apiPostDetail)
+	}
+	return
+}
+
+// GetCommunityPostList 根据社区id返回帖子
+func GetCommunityPostList(p *models.ParamCommunityPostList) (data []*models.ApiPostDetail, err error) {
+	//1.去redis查询id列表
+	ids, err := redis.GetCommunityPostListByID(p)
+	if err != nil {
+		return
+	}
+
+	//
+	zap.L().Debug("redis ids", zap.Any("ids", ids))
+
+	//2.根据列表去mysql数据库查询帖子详情
+	posts, err := mysql.GetPostOrderList(ids)
+	zap.L().Info("mysql posts", zap.Any("posts", posts))
+
+	//查询帖子的赞成票数
+	votes, err := redis.GetPostVoteData(ids)
+
+	//循环posts获取用户名和社区名称
+	for index, post := range posts {
+		//1.根据作者id查询作者用户名
+		author, err := mysql.GetAuthorNameById(uint64(post.AuthorID))
+		if err != nil {
+			zap.L().Error("mysql.GetAuthorNameById(post.AuthorID) failed.",
+				zap.Int64("authorID:", post.AuthorID),
+				zap.Error(err))
+			continue
+		}
+		// 1.根据社区id查询社区名称
+		community, err := mysql.GetCommunityByID(post.CommunityID)
+		if err != nil {
+			zap.L().Error("mysql.GetAuthorNameById(post.AuthorID) failed.",
+				zap.Int64("authorID:", post.AuthorID),
+				zap.Error(err))
 		}
 
 		apiPostDetail := &models.ApiPostDetail{

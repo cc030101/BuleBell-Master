@@ -3,6 +3,7 @@ package redis
 import (
 	"errors"
 	"math"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -40,12 +41,12 @@ const (
 )
 
 var (
-	ErrVoteExpire   = errors.New("距离帖子发出时间已超过7天,不可点赞")
-	ErrVoteRepested = errors.New("不允许重复投票")
+	ErrVoteExpire      = errors.New("距离帖子发出时间已超过7天,不可点赞")
+	ErrVoteRepestition = errors.New("不允许重复投票")
 )
 
 // 创建帖子存储时间
-func CreateCommunityPost(postID int64) (err error) {
+func CreateCommunityPost(postID, communityID int64) (err error) {
 	//使用事务更新redis数据
 	pipeline := rdb.TxPipeline()
 	//更新帖子时间
@@ -53,6 +54,10 @@ func CreateCommunityPost(postID int64) (err error) {
 		Score:  float64(time.Now().Unix()),
 		Member: postID,
 	})
+	//把帖子id加入到社区的set中
+	communityKey := getRedisKey(KeyCommunitySetPreFix + strconv.FormatInt(communityID, 10))
+	pipeline.SAdd(communityKey, postID)
+
 	//更新帖子分数
 	pipeline.ZAdd(getRedisKey(KeyPostScoreZSet), redis.Z{
 		Score:  float64(time.Now().Unix()),
@@ -81,7 +86,7 @@ func VoteForCommunity(userID, postID string, value float64) (err error) {
 
 	//检验是否重复投票
 	if value == oldValue {
-		return ErrVoteRepested
+		return ErrVoteRepestition
 	}
 	if value > oldValue {
 		//当前的分数大于历史分数

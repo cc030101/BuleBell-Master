@@ -140,3 +140,36 @@ func GetPostOrderListHandler(c *gin.Context) {
 	ResponseSuccess(c, list)
 	return
 }
+
+//GetCommunityPostListHandler 返回指定社区下的帖子
+
+func GetCommunityPostListHandler(c *gin.Context) {
+	//初始化结构体并指定默认参数制
+
+	p := &models.ParamCommunityPostList{
+		ParamOrderList: &models.ParamOrderList{
+			Page:  models.Page,
+			Size:  models.Size,
+			Order: models.OrderTime,
+		},
+	}
+
+	//1.获取参数校验
+	if err := c.ShouldBindQuery(p); err != nil {
+		zap.L().Error("参数错误", zap.Error(err))
+		ResponseError(c, CodeInvalidParam)
+		return
+	}
+
+	//2.去redis查询id列表
+	list, err := logic.GetCommunityPostList(p)
+	if err != nil {
+		zap.L().Error("service.GetCommunityPostList failed", zap.Error(err))
+		ResponseError(c, CodeServerBusy)
+		return
+	}
+
+	//3.返回响应
+	ResponseSuccess(c, list)
+	return
+}
